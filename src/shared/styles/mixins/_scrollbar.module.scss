@@ -1,0 +1,26 @@
+@mixin scrollbar($thumb-color, $track-color, $size) {
+  $px-width: if($size == small, 4px, 8px);
+
+  scrollbar-color: $thumb-color $track-color;
+  scrollbar-width: $size;
+
+  @at-root {
+    #{&}::-webkit-scrollbar {
+      width: $px-width;
+      height: $px-width;
+    }
+
+    #{&}::-webkit-scrollbar-thumb {
+      border-radius: $px-width;
+      background-color: $thumb-color;
+    }
+
+    #{&}::-webkit-scrollbar-track {
+      background-color: $track-color;
+    }
+
+    #{&}::-webkit-scrollbar-corner {
+      background-color: $track-color;
+    }
+  }
+}

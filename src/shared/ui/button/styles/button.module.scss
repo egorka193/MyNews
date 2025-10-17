@@ -1,0 +1,66 @@
+@use '../../../../shared/styles/mixins/common' as mixins;
+@use '../../../../shared/styles/mixins/typography' as typography;
+
+
+.button {
+  @include typography.headings-font-heading6;
+
+  position: relative;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+
+  &:focus:not(:disabled, :active) {
+    outline: 4px solid var(--system-focus-50);
+  }
+}
+
+.button--full-width {
+  width: 100%;
+}
+
+.button--large {
+  padding: 12px 32px;
+  border-radius: 8px;
+}
+
+.button--medium {
+  padding: 8px 24px;
+  border-radius: 8px;
+}
+
+.button--small {
+  @include typography.body-font-paragraph2-medium;
+
+  padding: 6px 16px;
+  border-radius: 6px;
+}
+
+.button--small {
+  .button__content-text {
+    margin-right: 4px;
+    margin-left: 4px;
+  }
+}
+
+.button__spinner {
+  position: absolute;
+  margin: auto;
+}
+
+.button__content {
+  display: flex;
+  align-items: center;
+
+  &-text {
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+
+  &.loading {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
