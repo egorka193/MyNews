@@ -10,6 +10,10 @@
   width: fit-content;
   align-items: center;
   justify-content: center;
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 8px;
+  padding: 8px 20px;
 
   &:focus:not(:disabled, :active) {
     outline: 4px solid var(--system-focus-50);
@@ -21,20 +25,15 @@
 }
 
 .button--large {
-  padding: 12px 32px;
-  border-radius: 8px;
+  padding: 16px 24px;
 }
 
 .button--medium {
   padding: 8px 24px;
-  border-radius: 8px;
 }
 
 .button--small {
   @include typography.body-font-paragraph2-medium;
-
-  padding: 6px 16px;
-  border-radius: 6px;
 }
 
 .button--small {

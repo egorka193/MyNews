@@ -1,60 +1,64 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// src/features/auth/login-form/index.tsx
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { BaseInput } from '@/shared/ui/input/base-input';
 import Button from '@/shared/ui/button/button';
 import { authApi } from '@/shared/api/auth-api';
+import { signInFormSchema, type SignInFormData } from '../schemas/sign-in-form-schema';
 import styles from './login-form.module.scss';
 
 export function LoginForm() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInFormSchema),
+    mode: 'onBlur',
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
+  const onSubmit = async (data: SignInFormData) => {
     try {
       const response = await authApi.signIn({
-        username: formData.username,
-        password: formData.password,
+        username: data.username,
+        password: data.password,
       });
+
+      console.log('Успешный вход!', response);
 
       localStorage.setItem('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
-    
-    
+      
       console.log('accessToken в localStorage:', localStorage.getItem('accessToken'));
       console.log('refreshToken в localStorage:', localStorage.getItem('refreshToken'));
 
       router.push('/main');
+      
     } catch (error: any) {
-      alert(error.message || 'Ошибка входа');
-    } finally {
-      setIsLoading(false);
+      console.error('Ошибка входа:', error);
+      
+      if (error.message?.includes('Invalid credentials') || error.message?.includes('Неверные')) {
+        setError('root', { message: 'Неверное имя пользователя или пароль' });
+      } else {
+        setError('root', { message: error.message || 'Ошибка входа' });
+      }
     }
   };
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-  };
-
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <div className={styles.fields}>
         <BaseInput
           label="Имя пользователя"
-          value={formData.username}
-          onChange={handleChange('username')}
+          {...register('username')}
+          errorMessage={errors.username?.message}
           placeholder="Введите ваше имя пользователя"
           size="small"
           required
@@ -63,19 +67,23 @@ export function LoginForm() {
         <BaseInput
           label="Пароль"
           type="password"
-          value={formData.password}
-          onChange={handleChange('password')}
+          {...register('password')}
+          errorMessage={errors.password?.message}
           placeholder="Введите ваш пароль"
           size="small"
           required
         />
       </div>
 
+      {errors.root && (
+        <div className={styles.error}>{errors.root.message}</div>
+      )}
+
       <Button
         type="submit"
         variant="primary"
         size="small"
-        isLoading={isLoading}
+        isLoading={isSubmitting}
         isFullWidth
         className={styles.button}
         text="Войти"

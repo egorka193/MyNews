@@ -1,98 +1,68 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
+// src/features/auth/register-form/index.tsx
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { BaseInput } from '@/shared/ui/input/base-input';
 import Button from '@/shared/ui/button/button';
 import { authApi } from '@/shared/api/auth-api';
+import { registerFormSchema } from '../schemas/register-form-schema';
+import type { z } from 'zod';
 import styles from './register-form.module.scss';
 
+type RegisterFormData = z.infer<typeof registerFormSchema>;
+
 export function RegisterForm() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    confirmPassword: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerFormSchema),
+    mode: 'onBlur',
+  });
 
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 8 || password.length > 32) {
-      return 'Пароль должен быть от 8 до 32 символов';
-    }
-    
-    if (!/(?=.*[a-z])/.test(password)) {
-      return 'Пароль должен содержать хотя бы одну строчную букву (a-z)';
-    }
-    
-    if (!/(?=.*[A-Z])/.test(password)) {
-      return 'Пароль должен содержать хотя бы одну заглавную букву (A-Z)';
-    }
-    
-    if (!/(?=.*\d)/.test(password)) {
-      return 'Пароль должен содержать хотя бы одну цифру (0-9)';
-    }
-    
-    return null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert('Пароли не совпадают');
-      return;
-    }
-
-    const passwordError = validatePassword(formData.password);
-    if (passwordError) {
-      alert(passwordError);
-      return;
-    }
-
-    setIsLoading(true);
-    
+  const onSubmit = async (data: RegisterFormData) => {
     try {
       const response = await authApi.signUp({
-        username: formData.username,
-        password: formData.password,
+        username: data.username,
+        password: data.password,
       });
 
       console.log('Успешная регистрация!', response);
 
-      const loginResponse = await authApi.signIn({
-        username: formData.username,
-        password: formData.password,
-      });
+      if (response.accessToken && response.refreshToken) {
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('refreshToken', response.refreshToken);
+        console.log('Токены сохранены из ответа регистрации');
+      }
 
-      localStorage.setItem('token', loginResponse.access_token);
-      
       router.push('/main');
       
     } catch (error: any) {
       console.error('Ошибка регистрации:', error);
-      alert(error.message || 'Ошибка регистрации');
-    } finally {
-      setIsLoading(false);
+      
+      if (error.message?.includes('username')) {
+        setError('username', { message: 'Пользователь с таким именем уже существует' });
+      } else {
+        setError('root', { message: error.message || 'Ошибка регистрации' });
+      }
     }
   };
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-  };
-
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <div className={styles.fields}>
         <BaseInput
           label="Имя пользователя"
-          value={formData.username}
-          onChange={handleChange('username')}
+          {...register('username')}
+          errorMessage={errors.username?.message}
           placeholder="Придумайте уникальное имя пользователя"
           size="small"
           required
@@ -101,8 +71,8 @@ export function RegisterForm() {
         <BaseInput
           label="Пароль"
           type="password"
-          value={formData.password}
-          onChange={handleChange('password')}
+          {...register('password')}
+          errorMessage={errors.password?.message}
           placeholder="От 8 до 32 символов: A-Z, a-z, 0-9"
           size="small"
           required
@@ -111,19 +81,24 @@ export function RegisterForm() {
         <BaseInput
           label="Подтвердить пароль"
           type="password"
-          value={formData.confirmPassword}
-          onChange={handleChange('confirmPassword')}
+          {...register('confirmPassword')}
+          errorMessage={errors.confirmPassword?.message}
           placeholder="Повторите пароль"
           size="small"
           required
         />
       </div>
 
+      {/* Общая ошибка формы */}
+      {errors.root && (
+        <div className={styles.error}>{errors.root.message}</div>
+      )}
+
       <Button
         type="submit"
         variant="primary"
         size="small"
-        isLoading={isLoading}
+        isLoading={isSubmitting}
         isFullWidth
         className={styles.button}
         text="Создать аккаунт"
