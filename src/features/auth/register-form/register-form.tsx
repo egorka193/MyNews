@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
-// src/features/auth/register-form/index.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -8,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { BaseInput } from '@/shared/ui/input/base-input';
 import Button from '@/shared/ui/button/button';
-import { authApi } from '@/shared/api/auth-api';
+import { useUserAuthControllerSignUpMutation } from '@/shared/api/generated';
 import { registerFormSchema } from '../schemas/register-form-schema';
 import type { z } from 'zod';
 import styles from './register-form.module.scss';
@@ -18,10 +17,12 @@ type RegisterFormData = z.infer<typeof registerFormSchema>;
 export function RegisterForm() {
   const router = useRouter();
   
+  const [signUp, { isLoading }] = useUserAuthControllerSignUpMutation();
+  
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
@@ -30,10 +31,12 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const response = await authApi.signUp({
-        username: data.username,
-        password: data.password,
-      });
+      const response = await signUp({
+        signUpRequestDto: {
+          username: data.username,
+          password: data.password,
+        }
+      }).unwrap();
 
       console.log('Успешная регистрация!', response);
 
@@ -48,10 +51,10 @@ export function RegisterForm() {
     } catch (error: any) {
       console.error('Ошибка регистрации:', error);
       
-      if (error.message?.includes('username')) {
+      if (error?.data?.message?.includes('username') || error?.status === 409) {
         setError('username', { message: 'Пользователь с таким именем уже существует' });
       } else {
-        setError('root', { message: error.message || 'Ошибка регистрации' });
+        setError('root', { message: error?.data?.message || 'Ошибка регистрации' });
       }
     }
   };
@@ -89,7 +92,6 @@ export function RegisterForm() {
         />
       </div>
 
-      {/* Общая ошибка формы */}
       {errors.root && (
         <div className={styles.error}>{errors.root.message}</div>
       )}
@@ -98,7 +100,7 @@ export function RegisterForm() {
         type="submit"
         variant="primary"
         size="small"
-        isLoading={isSubmitting}
+        isLoading={isLoading}
         isFullWidth
         className={styles.button}
         text="Создать аккаунт"

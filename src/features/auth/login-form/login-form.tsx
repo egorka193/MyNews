@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/features/auth/login-form/index.tsx
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -7,17 +6,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { BaseInput } from '@/shared/ui/input/base-input';
 import Button from '@/shared/ui/button/button';
-import { authApi } from '@/shared/api/auth-api';
+import { useUserAuthControllerSignInMutation } from '@/shared/api/generated';
 import { signInFormSchema, type SignInFormData } from '../schemas/sign-in-form-schema';
 import styles from './login-form.module.scss';
 
 export function LoginForm() {
   const router = useRouter();
   
+  const [signIn, { isLoading }] = useUserAuthControllerSignInMutation();
+  
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
@@ -26,10 +27,12 @@ export function LoginForm() {
 
   const onSubmit = async (data: SignInFormData) => {
     try {
-      const response = await authApi.signIn({
-        username: data.username,
-        password: data.password,
-      });
+      const response = await signIn({
+        signInRequestDto: {
+          username: data.username,
+          password: data.password,
+        }
+      }).unwrap();
 
       console.log('Успешный вход!', response);
 
@@ -44,10 +47,10 @@ export function LoginForm() {
     } catch (error: any) {
       console.error('Ошибка входа:', error);
       
-      if (error.message?.includes('Invalid credentials') || error.message?.includes('Неверные')) {
+      if (error?.data?.message?.includes('Invalid credentials') || error?.data?.message?.includes('Неверные')) {
         setError('root', { message: 'Неверное имя пользователя или пароль' });
       } else {
-        setError('root', { message: error.message || 'Ошибка входа' });
+        setError('root', { message: error?.data?.message || 'Ошибка входа' });
       }
     }
   };
@@ -83,7 +86,7 @@ export function LoginForm() {
         type="submit"
         variant="primary"
         size="small"
-        isLoading={isSubmitting}
+        isLoading={isLoading}
         isFullWidth
         className={styles.button}
         text="Войти"

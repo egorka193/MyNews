@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "api:download": "dotenv -- cross-var curl \"%JSON_API_URL%\" -o ./src/shared/api/openapi.json",
-    "api:generate": "npx @rtk-query/codegen-openapi ./src/shared/api/openapi-config.js",
+    "api:generate": "npx @rtk-query/codegen-openapi ./src/shared/api/openapi-config.ts",
     "api": "npm run api:download && npm run api:generate"
   },
   "dependencies": {
@@ -33,10 +33,11 @@
     "@types/react-dom": "^19",
     "cross-var": "^1.1.0",
     "dotenv-cli": "^10.0.0",
+    "esbuild": "^0.25.6",
+    "esbuild-runner": "^2.2.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
