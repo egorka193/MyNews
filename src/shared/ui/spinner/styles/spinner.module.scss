@@ -1,0 +1,35 @@
+.spinner {
+  animation: spinner 1s linear infinite;
+
+  &--small {
+    width: 16px;
+    height: 16px;
+  }
+
+  &--medium {
+    width: 20px;
+    height: 20px;
+  }
+
+  &--large {
+    width: 24px;
+    height: 24px;
+  }
+
+  &--extraLarge {
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}
+
+@keyframes spinner {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
