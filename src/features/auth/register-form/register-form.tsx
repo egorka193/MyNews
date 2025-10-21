@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import Button from '@/shared/ui/button/button';
 import { useUserAuthControllerSignUpMutation } from '@/shared/api/generated';
 import { registerFormSchema } from '../schemas/register-form-schema';
 import type { z } from 'zod';
+import { createSession } from '@/app/actions/session';
 import styles from './register-form.module.scss';
 
 type RegisterFormData = z.infer<typeof registerFormSchema>;
@@ -31,25 +32,21 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const response = await signUp({
+      const result = await signUp({
         signUpRequestDto: {
           username: data.username,
           password: data.password,
         }
-      }).unwrap();
+      });
 
-      console.log('Успешная регистрация!', response);
+      if (result.data?.accessToken && result.data?.refreshToken) {
 
-      if (response.accessToken && response.refreshToken) {
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        console.log('Токены сохранены из ответа регистрации');
+        await createSession(result.data.accessToken, result.data.refreshToken);
+
+        router.push('/main');
       }
-
-      router.push('/main');
       
     } catch (error: any) {
-      console.error('Ошибка регистрации:', error);
       
       if (error?.data?.message?.includes('username') || error?.status === 409) {
         setError('username', { message: 'Пользователь с таким именем уже существует' });

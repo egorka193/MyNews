@@ -8,6 +8,7 @@ import { BaseInput } from '@/shared/ui/input/base-input';
 import Button from '@/shared/ui/button/button';
 import { useUserAuthControllerSignInMutation } from '@/shared/api/generated';
 import { signInFormSchema, type SignInFormData } from '../schemas/sign-in-form-schema';
+import { createSession } from '@/app/actions/session';
 import styles from './login-form.module.scss';
 
 export function LoginForm() {
@@ -27,25 +28,20 @@ export function LoginForm() {
 
   const onSubmit = async (data: SignInFormData) => {
     try {
-      const response = await signIn({
+      const result = await signIn({
         signInRequestDto: {
           username: data.username,
           password: data.password,
         }
-      }).unwrap();
+      });
 
-      console.log('Успешный вход!', response);
+      if (result.data?.accessToken && result.data?.refreshToken) {
 
-      localStorage.setItem('accessToken', response.accessToken);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      
-      console.log('accessToken в localStorage:', localStorage.getItem('accessToken'));
-      console.log('refreshToken в localStorage:', localStorage.getItem('refreshToken'));
-
-      router.push('/main');
+        await createSession(result.data.accessToken, result.data.refreshToken);
+        router.push('/main');
+      }
       
     } catch (error: any) {
-      console.error('Ошибка входа:', error);
       
       if (error?.data?.message?.includes('Invalid credentials') || error?.data?.message?.includes('Неверные')) {
         setError('root', { message: 'Неверное имя пользователя или пароль' });
