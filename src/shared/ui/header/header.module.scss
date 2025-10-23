@@ -1,0 +1,50 @@
+.header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-radius: 16px;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 64px;
+}
+
+.logo {
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 20px;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.logoImage {
+  height: 32px;
+  width: auto;
+}
+
+.logoText {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+}

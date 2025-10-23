@@ -1,20 +1,25 @@
-export function MainPage() {
+// app/main/page.tsx
+import { Header } from '@/shared/ui/header/header';
+import { WelcomeSection } from '@/features/welcome/welcomeSection';
+import { PopularNews } from '@/features/popularNews/popularNews';
+import styles from './MainPage.module.scss';
+
+export default function MainPage() {
   return (
-    <div style={{ 
-      padding: '40px', 
-      textAlign: 'center',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
-        Добро пожаловать в мою Ленту!
-      </h1>
-      <p style={{ fontSize: '1.2rem', marginBottom: '2rem', color: '#666' }}>
-        Скоро здесь появится интересный контент
-      </p>
+    <div className={styles.page}>
+      <Header />
+      <main className={styles.main}>
+        <div className={styles.container}>
+          <div className={styles.content}>
+            <div className={styles.mainContent}>
+              <WelcomeSection />
+            </div>
+            <div className={styles.sidebar}>
+              <PopularNews />
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
