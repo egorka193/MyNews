@@ -9,6 +9,7 @@ import { useUserControllerUpdateMutation, useUserControllerGetMeQuery } from '@/
 import styles from './profileForm.module.scss';
 import { EyeOffIcon } from '@/shared/ui/icons/eye-off-icon';
 import { EyeIcon } from '@/shared/ui/icons/eye-icon';
+import { BackButton } from '@/shared/ui/backButton/BackButton';
 
 type ProfileFormData = {
   username?: string;
@@ -268,6 +269,7 @@ export function ProfileForm() {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit(onSubmitLogin)}>
+      <BackButton className={styles.backButton} />
       <div className={styles.section}>
         <div className={styles.header}>
           <h1 className={styles.title}>Личные данные</h1>

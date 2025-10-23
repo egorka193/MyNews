@@ -3,7 +3,7 @@
   background-color: #FFFFFF;
   padding: 50px 60px;
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 16px;
@@ -43,4 +43,10 @@
   margin-bottom: 15px;
   font-size: 14px;
   color: #A0A0A0;
+}
+
+.backButton {
+  position: absolute;
+  left: -12%;
+  top: 0;
 }
