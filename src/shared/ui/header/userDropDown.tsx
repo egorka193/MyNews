@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useOnClickOutside } from 'usehooks-ts';
 import { useUser } from '@/shared/hooks/useUser';
 import { deleteSession } from '@/app/actions/session';
 import styles from './userDropdown.module.scss';
@@ -12,28 +13,24 @@ export function UserDropdown() {
   const router = useRouter();
   const { user, isLoading } = useUser();
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const accessToken = document.cookie.split('; ').find(row => row.startsWith('access='))?.split('=')[1];
-  }, []);
+  useOnClickOutside(dropdownRef as React.RefObject<HTMLElement>, () => {
+    setIsOpen(false);
+  });
 
   const handleLogout = async () => {
     try {
       await deleteSession();
+      setIsOpen(false); 
       router.push('/');
+      router.refresh(); 
     } catch (error) {
       console.error('Ошибка выхода:', error);
     }
+  };
+
+  const handleProfileClick = () => {
+    setIsOpen(false);
+    router.push('/profile');
   };
 
   return (
@@ -41,6 +38,7 @@ export function UserDropdown() {
       <button 
         className={styles.trigger}
         onClick={() => setIsOpen(!isOpen)}
+        disabled={isLoading}
       >
         <span className={styles.username}>
           {isLoading ? '...' : user?.username || 'Username'}
@@ -59,15 +57,11 @@ export function UserDropdown() {
 
       {isOpen && (
         <div className={styles.menu}>
-          
           <div className={styles.divider} />
           
           <button 
             className={styles.menuItem}
-            onClick={() => {
-              setIsOpen(false);
-              router.push('/profile');
-            }}
+            onClick={handleProfileClick}
           >
             <span>Личные данные</span>
           </button>

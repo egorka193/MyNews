@@ -1,9 +1,18 @@
-import { Header } from '@/shared/ui/header/header';
-import { LeftSection } from '@/features/LeftSection/LeftSection';
 import { PopularNews } from '@/features/popularNews/popularNews';
+import { Header } from '@/shared/ui/header/header';
 import styles from './MainPage.module.scss';
+import { ServerLeftSection } from '@/features/LeftSection/ServerLeftSection';
 
-export default function MainPage() {
+interface MainPageProps {
+  searchParams: Promise<{
+    week?: 'this-week' | 'last-week';
+  }>;
+}
+
+export default async function MainPage({ searchParams }: MainPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const activeTab = resolvedSearchParams.week || 'this-week';
+
   return (
     <div className={styles.page}>
       <Header />
@@ -11,7 +20,7 @@ export default function MainPage() {
         <div className={styles.container}>
           <div className={styles.content}>
             <div className={styles.mainContent}>
-              <LeftSection />
+              <ServerLeftSection initialTab={activeTab} />
             </div>
             <div className={styles.sidebar}>
               <PopularNews />

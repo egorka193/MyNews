@@ -36,3 +36,26 @@
     text-decoration: underline;
   }
 }
+
+.passwordInputWrapper {
+  position: relative;
+  align-items: center;
+  width: 100%;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  z-index: 2;
+  
+  &:hover {
+    color: #333;
+  }
+}

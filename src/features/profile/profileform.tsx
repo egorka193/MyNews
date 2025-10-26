@@ -18,11 +18,22 @@ type ProfileFormData = {
   confirmPassword?: string;
 };
 
-export function ProfileForm() {
+interface ProfileFormProps {
+  initialUser?: {
+    id: string;
+    username: string;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+}
+
+export function ProfileForm({ initialUser }: ProfileFormProps) {
   const { data: user, isLoading: userLoading } = useUserControllerGetMeQuery();
   const [updateUser, { isLoading: updateLoading }] = useUserControllerUpdateMutation();
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
+  const currentUser = initialUser || user;
+  
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] = useState(false);
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -38,7 +49,7 @@ export function ProfileForm() {
     resetField,
   } = useForm<ProfileFormData>({
     defaultValues: {
-      username: user?.username || '',
+      username: currentUser?.username || '',
     },
   });
 
@@ -57,16 +68,16 @@ export function ProfileForm() {
   };
   
   useEffect(() => {
-    if (user) {
+    if (currentUser) {
       reset({
-        username: user.username || '',
+        username: currentUser.username || '',
       });
     }
-  }, [user, reset]);
+  }, [currentUser, reset]);
 
   const onSubmitLogin = async (data: ProfileFormData) => {
     try {
-      if (data.username && data.username !== user?.username) {
+      if (data.username && data.username !== currentUser?.username) {
         await updateUser({
           userUpdateRequestDto: { username: data.username },
         }).unwrap();
@@ -137,27 +148,22 @@ export function ProfileForm() {
 
   const newPassword = watch('newPassword');
 
-  if (userLoading) {
+  if (userLoading && !currentUser) {
     return <div className={styles.loading}>Загрузка...</div>;
   }
+
 
   if (isChangingPassword) {
     return (
       <div className={styles.container}>
         <div className={styles.backButtonContainer}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="small"
-            onClick={handleCancelPasswordChange}
-            className={styles.backButton}
-            text="←"
-          />
+        
         </div>
         
         <form className={styles.form} onSubmit={handleSubmit(onSubmitPassword)}>
+          <BackButton className={styles.backButton} />
           <div className={styles.section}>
-            <h1 className={styles.title}>Смена пароля</h1>
+            <h1 className={styles.title}>Пароль</h1>
             
             <div className={styles.fields}>
               <div className={styles.fieldGroup}>

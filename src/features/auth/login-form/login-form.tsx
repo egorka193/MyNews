@@ -10,9 +10,13 @@ import { useUserAuthControllerSignInMutation } from '@/shared/api/generated';
 import { signInFormSchema, type SignInFormData } from '../schemas/sign-in-form-schema';
 import { createSession } from '@/app/actions/session';
 import styles from './login-form.module.scss';
+import { EyeOffIcon } from '@/shared/ui/icons/eye-off-icon';
+import { EyeIcon } from '@/shared/ui/icons/eye-icon';
+import { useState } from 'react';
 
 export function LoginForm() {
   const router = useRouter();
+  const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] = useState(false);
   
   const [signIn, { isLoading }] = useUserAuthControllerSignInMutation();
   
@@ -63,15 +67,26 @@ export function LoginForm() {
           required
         />
 
-        <BaseInput
-          label="Пароль"
-          type="password"
-          {...register('password')}
-          errorMessage={errors.password?.message}
-          placeholder="Введите ваш пароль"
-          size="small"
-          required
-        />
+        <div className={styles.passwordInputWrapper}>
+          <BaseInput
+            type={isCurrentPasswordVisible ? 'text' : 'password'}
+            {...register('password')}
+            errorMessage={errors.password?.message}
+            placeholder="Введите текущий пароль"
+            size="small"
+          />
+          <button
+            type="button"
+            onClick={() => setIsCurrentPasswordVisible(!isCurrentPasswordVisible)}
+            className={styles.eyeButton}
+          >
+            {isCurrentPasswordVisible ? (
+              <EyeOffIcon width={16} height={16} />
+            ) : (
+              <EyeIcon width={16} height={16} />
+            )}
+          </button>
+        </div>
       </div>
 
       {errors.root && (
