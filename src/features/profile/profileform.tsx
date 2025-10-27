@@ -10,6 +10,7 @@ import styles from './profileForm.module.scss';
 import { EyeOffIcon } from '@/shared/ui/icons/eye-off-icon';
 import { EyeIcon } from '@/shared/ui/icons/eye-icon';
 import { BackButton } from '@/shared/ui/backButton/BackButton';
+import { useToaster } from '@/features/toaster/useToaster';
 
 type ProfileFormData = {
   username?: string;
@@ -30,6 +31,7 @@ interface ProfileFormProps {
 export function ProfileForm({ initialUser }: ProfileFormProps) {
   const { data: user, isLoading: userLoading } = useUserControllerGetMeQuery();
   const [updateUser, { isLoading: updateLoading }] = useUserControllerUpdateMutation();
+  const { toastSuccess, toastError } = useToaster();
   
   const currentUser = initialUser || user;
   
@@ -77,6 +79,16 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 
   const onSubmitLogin = async (data: ProfileFormData) => {
     try {
+      if (!data.username || data.username.length < 3) {
+        setError('username', { message: 'Минимум 3 символа' });
+        return;
+      }
+      
+      if (data.username.length > 20) {
+        setError('username', { message: 'Максимум 20 символов' });
+        return;
+      }
+
       if (data.username && data.username !== currentUser?.username) {
         await updateUser({
           userUpdateRequestDto: { username: data.username },
@@ -86,15 +98,17 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
           username: data.username,
         });
         
-        alert('Логин успешно обновлен!');
+        toastSuccess('Логин успешно обновлен!');
       }
       
     } catch (error: any) {
       console.error('Ошибка обновления:', error);
       if (error?.data?.message?.includes('username')) {
         setError('username', { message: 'Пользователь с таким именем уже существует' });
+        toastError('Пользователь с таким именем уже существует');
       } else {
         setError('root', { message: error?.data?.message || 'Ошибка обновления' });
+        toastError('Ошибка обновления профиля');
       }
     }
   };
@@ -102,19 +116,19 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
   const onSubmitPassword = async (data: ProfileFormData) => {
     try {
       if (!data.currentPassword) {
-        setError('currentPassword', { message: 'Введите текущий пароль' });
+        toastError('Введите текущий пароль');
         return;
       }
       if (!data.newPassword) {
-        setError('newPassword', { message: 'Введите новый пароль' });
+        toastError('Введите новый пароль');
         return;
       }
       if (data.newPassword !== data.confirmPassword) {
-        setError('confirmPassword', { message: 'Пароли не совпадают' });
+        toastError('Пароли не совпадают');
         return;
       }
       if (data.newPassword.length < 8) {
-        setError('newPassword', { message: 'Пароль должен состоять минимум из 8 символов' });
+        toastError('Пароль должен состоять минимум из 8 символов');
         return;
       }
       
@@ -134,14 +148,17 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
       });
       
       setIsChangingPassword(false);
-      alert('Пароль успешно изменен!');
+      
+      toastSuccess('Пароль успешно изменен!');
       
     } catch (error: any) {
       console.error('Ошибка обновления:', error);
       if (error?.data?.message?.includes('password') || error?.data?.message?.includes('неверный')) {
         setError('currentPassword', { message: 'Неверный текущий пароль' });
+        toastError('Неверный текущий пароль');
       } else {
         setError('root', { message: error?.data?.message || 'Ошибка обновления пароля' });
+        toastError('Ошибка обновления пароля');
       }
     }
   };
@@ -151,7 +168,6 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
   if (userLoading && !currentUser) {
     return <div className={styles.loading}>Загрузка...</div>;
   }
-
 
   if (isChangingPassword) {
     return (
@@ -196,10 +212,6 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                   <BaseInput
                     type={isNewPasswordVisible ? 'text' : 'password'}
                     {...register('newPassword', {
-                      minLength: {
-                        value: 8,
-                        message: 'Пароль должен состоять минимум из 8 символов'
-                      }
                     })}
                     errorMessage={errors.newPassword?.message}
                     placeholder="Введите новый пароль"
@@ -230,7 +242,6 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                 <BaseInput
                   type={isConfirmPasswordVisible ? 'text' : 'password'}
                   {...register('confirmPassword', {
-                    validate: value => value === newPassword || 'Пароли не совпадают'
                   })}
                   errorMessage={errors.confirmPassword?.message}
                   placeholder="Введите новый пароль еще раз"
@@ -261,6 +272,14 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                 isLoading={updateLoading}
                 className={styles.saveButton}
                 text="Сохранить"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="small"
+                onClick={handleCancelPasswordChange}
+                className={styles.cancelButton}
+                text="Отмена"
               />
             </div>
           </div>

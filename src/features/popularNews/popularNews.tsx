@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useNewsControllerGetTopQuery } from '@/shared/api/generated';
@@ -6,24 +5,8 @@ import type { NewsGetTopResponseDto } from '@/shared/api/generated';
 import styles from './popularNews.module.scss';
 
 export function PopularNews() {
-  const { data: topNews, isLoading, error } = useNewsControllerGetTopQuery();
+  const { data: topNews, error } = useNewsControllerGetTopQuery();
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString('ru-RU', { month: 'long' });
-    const year = date.getFullYear();
-    return `${day} ${month}, ${year}`;
-  };
-
-  if (isLoading) {
-    return (
-      <section className={styles.popularNews}>
-        <h2 className={styles.sectionTitle}>Популярные новости</h2>
-        <div className={styles.loading}>Загрузка новостей...</div>
-      </section>
-    );
-  }
 
   if (error) {
     return (
@@ -69,3 +52,11 @@ export function PopularNews() {
     </section>
   );
 }
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString('ru-RU', { month: 'long' });
+  const year = date.getFullYear();
+  return `${day} ${month}, ${year}`;
+};

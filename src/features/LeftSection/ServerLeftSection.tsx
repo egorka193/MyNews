@@ -1,59 +1,51 @@
 import type { NewsGetManyResponseDto } from '@/shared/api/generated';
 import { WeekTabs } from '@/shared/ui/WeekTabs/WeekTabs';
 import { fetchISR } from '@/shared/lib/helpers/api-utils';
-import { ClientNewsCard } from './ClientNewsCard';
 import styles from './ServerLeftSection.module.scss';
+import { NewsInfiniteScroll } from './NewsInfiniteScroll/NewsInfiniteScroll';
 
 interface ServerLeftSectionProps {
   initialTab?: 'this-week' | 'last-week';
 }
 
-async function getNewsForWeek(week: 'this-week' | 'last-week') {
+async function getInitialNews(week: 'this-week' | 'last-week') {
   const forLastWeek = week === 'last-week';
   
-  const { data } = await fetchISR<NewsGetManyResponseDto>(
-    '/news',
-    30,
-    {
-      params: { 
-        size: '20',
-        forLastWeek: forLastWeek.toString()
+  try {
+    const { data } = await fetchISR<NewsGetManyResponseDto>(
+      '/news',
+      30,
+      {
+        params: { 
+          size: '10',
+          forLastWeek: forLastWeek.toString()
+        }
       }
-    }
-  );
-  
-  return data.results;
+    );
+    
+    return data?.results || [];
+  } catch (error) {
+    console.error('Error fetching initial news:', error);
+    return [];
+  }
 }
 
 export async function ServerLeftSection({ initialTab = 'this-week' }: ServerLeftSectionProps) {
   try {
-    const news = await getNewsForWeek(initialTab);
+    const initialNews = await getInitialNews(initialTab);
 
     return (
       <section className={styles.welcome}>
         <WeekTabs defaultTab={initialTab} />
         
-        <div className={styles.newsList}>
-          {news.slice(0, 10).map((newsItem) => (
-            <ClientNewsCard 
-              key={newsItem.id}
-              newsItem={newsItem}
-            />
-          ))}
-          
-          {news.length === 0 && (
-            <div className={styles.noNews}>
-              {initialTab === 'this-week' 
-                ? 'На этой неделе новостей пока нет' 
-                : 'На прошлой неделе новостей не было'
-              }
-            </div>
-          )}
-        </div>
+        <NewsInfiniteScroll 
+          initialNews={initialNews}
+          initialTab={initialTab}
+        />
       </section>
     );
   } catch (error) {
-    console.error('Error loading news:', error);
+    console.error('Error in ServerLeftSection:', error);
     return (
       <section className={styles.welcome}>
         <WeekTabs defaultTab={initialTab} />

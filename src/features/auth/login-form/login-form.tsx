@@ -40,13 +40,11 @@ export function LoginForm() {
       });
 
       if (result.data?.accessToken && result.data?.refreshToken) {
-
         await createSession(result.data.accessToken, result.data.refreshToken);
         router.push('/main');
       }
       
     } catch (error: any) {
-      
       if (error?.data?.message?.includes('Invalid credentials') || error?.data?.message?.includes('Неверные')) {
         setError('root', { message: 'Неверное имя пользователя или пароль' });
       } else {
@@ -67,26 +65,27 @@ export function LoginForm() {
           required
         />
 
-        <div className={styles.passwordInputWrapper}>
-          <BaseInput
-            type={isCurrentPasswordVisible ? 'text' : 'password'}
-            {...register('password')}
-            errorMessage={errors.password?.message}
-            placeholder="Введите текущий пароль"
-            size="small"
-          />
-          <button
-            type="button"
-            onClick={() => setIsCurrentPasswordVisible(!isCurrentPasswordVisible)}
-            className={styles.eyeButton}
-          >
-            {isCurrentPasswordVisible ? (
-              <EyeOffIcon width={16} height={16} />
-            ) : (
-              <EyeIcon width={16} height={16} />
-            )}
-          </button>
-        </div>
+        <BaseInput
+          label="Пароль"
+          type={isCurrentPasswordVisible ? 'text' : 'password'}
+          {...register('password')}
+          errorMessage={errors.password?.message}
+          placeholder="Введите текущий пароль"
+          size="small"
+          contentRight={
+            <button
+              type="button"
+              onClick={() => setIsCurrentPasswordVisible(!isCurrentPasswordVisible)}
+              className={styles.eyeButton}
+            >
+              {isCurrentPasswordVisible ? (
+                <EyeOffIcon width={16} height={16} />
+              ) : (
+                <EyeIcon width={16} height={16} />
+              )}
+            </button>
+          }
+        />
       </div>
 
       {errors.root && (

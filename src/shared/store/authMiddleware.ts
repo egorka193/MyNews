@@ -16,7 +16,6 @@ export const authMiddleware: Middleware = (store) => (next) => (action: any) => 
     const payload = (action as any).payload
     
     if (isErrorWithStatus(payload) && payload.status === 401) {
-      console.log('Обнаружена 401 ошибка, пытаемся обновить токен...')
     
       const getCookie = (name: string) => {
         if (typeof document === 'undefined') return null
@@ -35,7 +34,6 @@ export const authMiddleware: Middleware = (store) => (next) => (action: any) => 
         store.dispatch(refreshAction)
           .unwrap()
           .then((result: { accessToken: string; refreshToken: string }) => {
-            console.log('Токен успешно обновлен')
             document.cookie = `access=${result.accessToken}; path=/; max-age=86400`
             document.cookie = `refresh=${result.refreshToken}; path=/; max-age=604800`
           })

@@ -101,10 +101,10 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
     return (
       <label className={cnRoot}>
         {label && <p className={cnLabel}>{label}</p>}
-
+    
         <div className={cnOuter}>
           {contentLeft && <div className={cnContentLeft}>{contentLeft}</div>}
-
+    
           <input
             {...props}
             className={cnField}
@@ -123,29 +123,34 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
               props.onFocus?.(e);
             }}
           />
-
+    
           {isLoading && (
             <div className={cnContentRight}>
               <Spinner variant="default" />
             </div>
           )}
-
-          {isShowContentRight && <div className={cnContentRight}>{contentRight}</div>}
-
+    
           {isShowErrorIcon && (
             <div className={cnContentRight}>
               <SvgWarningCircle color={'var(--system-error)'} width={16} height={16} />
             </div>
           )}
-
+    
+          {isShowContentRight && <div className={cnContentRight}>{contentRight}</div>}
+    
           {isShowClearButton && (
             <button type="button" className={cnContentRight} onClick={handleClear}>
               <SvgCrossCircled width={16} height={16} />
             </button>
           )}
         </div>
-
-        {hasCaption && <p className={cnCaption}>{captionText}</p>}
+    
+        {hasCaption && (
+          <p className={cnCaption}>
+            {captionText}
+            {isError && <SvgWarningCircle color={'var(--system-error)'} width={16} height={16} />}
+          </p>
+        )}
       </label>
     );
   }
