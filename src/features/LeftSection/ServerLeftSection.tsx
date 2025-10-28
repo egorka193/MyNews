@@ -14,7 +14,7 @@ async function getInitialNews(week: 'this-week' | 'last-week') {
   try {
     const { data } = await fetchISR<NewsGetManyResponseDto>(
       '/news',
-      30,
+      forLastWeek ? (60*60*24*7) : (60*30),
       {
         params: { 
           size: '10',

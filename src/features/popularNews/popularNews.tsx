@@ -3,10 +3,15 @@
 import { useNewsControllerGetTopQuery } from '@/shared/api/generated';
 import type { NewsGetTopResponseDto } from '@/shared/api/generated';
 import styles from './popularNews.module.scss';
+import { useRouter } from 'next/navigation';
 
 export function PopularNews() {
   const { data: topNews, error } = useNewsControllerGetTopQuery();
+  const router = useRouter();
 
+  const handleNewsClick = (newsId: string) => {
+    router.push(`/news/${newsId}`);
+  };
 
   if (error) {
     return (
@@ -24,7 +29,12 @@ export function PopularNews() {
       <h2 className={styles.sectionTitle}>Популярные новости</h2>
       <div className={styles.newsList}>
         {newsArray.slice(0, 5).map((news: NewsGetTopResponseDto) => (
-          <div key={news.id} className={styles.newsItem}>
+          <div 
+            key={news.id} 
+            className={styles.newsItem}
+            onClick={() => handleNewsClick(news.id)}
+            style={{ cursor: 'pointer' }}
+          >
             <div className={styles.newsHeader}>
               <strong className={styles.newsTitle}>Новость</strong>
               <span className={styles.date}>{formatDate(news.createdAt)}</span>
