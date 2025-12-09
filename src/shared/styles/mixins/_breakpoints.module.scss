@@ -1,0 +1,83 @@
+/* stylelint-disable scss/no-global-function-names */
+/* stylelint-disable order/properties-order */
+/* stylelint-disable csstools/media-use-custom-media */
+@use 'sass:map';
+
+$breakpoint-sizes: (
+  'mobile-s': 320px,
+  'mobile-m': 375px,
+  'mobile-l': 424px,
+  'tablet': 768px,
+  'laptop-s': 1024px,
+  'laptop-m': 1200px,
+  'laptop-l': 1440px,
+  'desktop': 1920px,
+);
+
+:export {
+  @each $key, $value in $breakpoint-sizes {
+    min-#{$key}: $value;
+  }
+  @each $key, $value in $breakpoint-sizes {
+    max-#{$key}: $value - 0.02px;
+  }
+}
+
+@function get-breakpoint-max($name) {
+  $min: map.get($breakpoint-sizes, $name);
+  @return if($min != 0, $min, null);
+}
+
+@function get-breakpoint-min($name) {
+  $max: map.get($breakpoint-sizes, $name);
+  @return if($max and $max > 0, $max - 0.02px, null);
+}
+
+@mixin media-query-min($value) {
+  $min: get-breakpoint-max($value);
+
+  @if $min != null {
+    @media screen and (min-width: $min) {
+      @content;
+    }
+  }
+
+  else {
+    @media screen and (min-width: $value) {
+      @content;
+    }
+  }
+}
+
+@mixin media-query-max($value) {
+  $max: get-breakpoint-min($value);
+
+  @if $max != null {
+    @media screen and (max-width: $max) {
+      @content;
+    }
+  }
+
+  else {
+    @media screen and (max-width: $value) {
+      @content;
+    }
+  }
+}
+
+@mixin media-query-within($value-min, $value-max) {
+  $min: get-breakpoint-max($value-min);
+  $max: get-breakpoint-min($value-max);
+
+  @if $min != null and $max != null {
+    @media screen and (min-width: $min) and (max-width: $max) {
+      @content;
+    }
+  }
+
+  else {
+    @media screen and (min-width: $value-min) and (max-width: $value-max) {
+      @content;
+    }
+  }
+}
