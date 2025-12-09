@@ -20,6 +20,7 @@
     "react-hook-form": "^7.65.0",
     "react-redux": "^9.2.0",
     "sass": "^1.93.2",
+    "usehooks-ts": "^3.1.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

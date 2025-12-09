@@ -1,0 +1,57 @@
+.form{
+  min-width: 500px;
+  background-color: #FFFFFF;
+  padding: 50px 60px;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.passwordInputWrapper {
+  position: relative;
+  align-items: center;
+  width: 100%;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  z-index: 2;
+  
+  &:hover {
+    color: #333;
+  }
+}
+
+.passwordInfo{
+  margin-bottom: 5px;
+}
+.sectionTitle{
+  margin-bottom: 8px;
+}
+
+.passwordHint{
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #A0A0A0;
+}
+
+.backButton {
+  position: absolute;
+  left: -12%;
+  top: 0;
+}
+
+
+.title {
+  margin-bottom: 50px;
+}

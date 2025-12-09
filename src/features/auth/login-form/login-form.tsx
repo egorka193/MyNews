@@ -10,9 +10,13 @@ import { useUserAuthControllerSignInMutation } from '@/shared/api/generated';
 import { signInFormSchema, type SignInFormData } from '../schemas/sign-in-form-schema';
 import { createSession } from '@/app/actions/session';
 import styles from './login-form.module.scss';
+import { EyeOffIcon } from '@/shared/ui/icons/eye-off-icon';
+import { EyeIcon } from '@/shared/ui/icons/eye-icon';
+import { useState } from 'react';
 
 export function LoginForm() {
   const router = useRouter();
+  const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] = useState(false);
   
   const [signIn, { isLoading }] = useUserAuthControllerSignInMutation();
   
@@ -36,13 +40,11 @@ export function LoginForm() {
       });
 
       if (result.data?.accessToken && result.data?.refreshToken) {
-
         await createSession(result.data.accessToken, result.data.refreshToken);
         router.push('/main');
       }
       
     } catch (error: any) {
-      
       if (error?.data?.message?.includes('Invalid credentials') || error?.data?.message?.includes('Неверные')) {
         setError('root', { message: 'Неверное имя пользователя или пароль' });
       } else {
@@ -65,12 +67,24 @@ export function LoginForm() {
 
         <BaseInput
           label="Пароль"
-          type="password"
+          type={isCurrentPasswordVisible ? 'text' : 'password'}
           {...register('password')}
           errorMessage={errors.password?.message}
-          placeholder="Введите ваш пароль"
+          placeholder="Введите текущий пароль"
           size="small"
-          required
+          contentRight={
+            <button
+              type="button"
+              onClick={() => setIsCurrentPasswordVisible(!isCurrentPasswordVisible)}
+              className={styles.eyeButton}
+            >
+              {isCurrentPasswordVisible ? (
+                <EyeOffIcon width={16} height={16} />
+              ) : (
+                <EyeIcon width={16} height={16} />
+              )}
+            </button>
+          }
         />
       </div>
 
